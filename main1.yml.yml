@@ -1,0 +1,25 @@
+---
+- name: Criar VM a partir de Template no vSphere
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ vm_datacenter }}"
+    folder: "{{ vm_folder }}"
+    name: "{{ vm_name }}"
+    template: "{{ vm_template }}"
+    cluster: "{{ vm_cluster }}"
+    datastore: "{{ vm_datastore }}"
+    networks:
+      - name: "{{ vm_network }}"
+    state: poweredoff
+    customization:
+      hostname: "{{ vm_name }}"
+      domain: local
+    hardware:
+      memory_mb: 4096
+      num_cpus: 2
+    wait_for_ip_address: true
+  delegate_to: localhost
+

@@ -1,0 +1,16 @@
+---
+- name: Criação de VM no vSphere via Template + Policy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
+
+  vars_prompt:
+    - name: vcenter_password
+      prompt: "Digite a senha do vCenter"
+      private: yes
+
+  roles:
+    - create_vm
