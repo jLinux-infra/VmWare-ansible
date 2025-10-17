@@ -2,6 +2,7 @@
 - name: Testar conexão com os hosts
   hosts: all
   gather_facts: false
+  become: yes
 
   tasks:
     - name: Ping com Ansible
