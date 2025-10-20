@@ -1,0 +1,17 @@
+---
+- name: Listar grupos do usuário think nos servidores
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Obter grupos que contêm o usuário think
+      ansible.builtin.shell: "grep think /etc/group"
+      register: grupos_think
+      changed_when: false
+
+    - name: Exibir resultado por host
+      ansible.builtin.debug:
+        msg: |
+          Servidor: {{ inventory_hostname }}
+          {{ grupos_think.stdout | default('Nenhum grupo encontrado') }}
