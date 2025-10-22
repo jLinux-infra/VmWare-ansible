@@ -1,24 +1,108 @@
 ---
-- name: Criar VM a partir de Template no vSphere
-  community.vmware.vmware_guest:
-    hostname: "{{ vcenter_hostname }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    validate_certs: no
-    datacenter: "{{ vm_datacenter }}"
-    folder: "{{ vm_folder }}"
-    name: "{{ vm_name }}"
-    template: "{{ vm_template }}"
-    cluster: "{{ vm_cluster }}"
-    datastore: "{{ vm_datastore }}"
-    networks:
-      - name: "{{ vm_network }}"
-    state: poweredoff
-    customization:
-      hostname: "{{ vm_name }}"
-      domain: local
-    hardware:
-      memory_mb: 4096
-      num_cpus: 2
-    wait_for_ip_address: true
-  delegate_to: localhost
+- name: Criação de VM no vSphere via Template e Policy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
+    default_disk_type: "thin"  # Tipo de provisionamento para os discos
+
+  vars_prompt:
+    # Perguntar o nome da máquina
+    - name: vm_name
+      prompt: "Qual o nome da máquina (VM)?"
+      private: no
+    
+    # Perguntar a política da VM
+    - name: vm_policy
+      prompt: "Qual o nome da policy da VM?"
+      private: no
+
+    # Perguntar a quantidade de memória (em GB)
+    - name: memory_gb
+      prompt: "Quantos GB de memória a VM deve ter?"
+      private: no
+
+    # Perguntar a quantidade de CPUs
+    - name: num_cpus
+      prompt: "Quantas CPUs a VM deve ter?"
+      private: no
+
+    # Perguntar se o usuário quer adicionar discos extras
+    - name: add_disks
+      prompt: "Você deseja adicionar discos extras? (sim/não)"
+      private: no
+
+  tasks:
+    # Criação da VM
+    - name: Criar VM a partir de Template no vSphere
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: no
+        datacenter: "{{ vm_datacenter }}"
+        folder: "{{ vm_folder }}"
+        name: "{{ vm_name }}"
+        template: "{{ vm_template }}"
+        cluster: "{{ vm_cluster }}"
+        datastore: "{{ vm_datastore }}"
+        networks:
+          - name: "{{ vm_network }}"
+        state: poweredoff  # Criando a VM desligada
+        customization:
+          hostname: "{{ vm_name }}"
+          domain: local
+        hardware:
+          memory_mb: "{{ memory_gb | int * 1024 }}"  # Convertendo GB para MB
+          num_cpus: "{{ num_cpus }}"
+        wait_for_ip_address: true
+      delegate_to: localhost
+
+    # Perguntar sobre discos extras, caso o usuário deseje
+    - name: Perguntar sobre discos extras (caso sim)
+      block:
+        - name: Perguntar o número de discos extras
+          vars_prompt:
+            - name: num_extra_disks
+              prompt: "Quantos discos extras você deseja adicionar?"
+              private: no
+          when: add_disks == "sim"
+        
+        - name: Perguntar o tamanho de cada disco
+          vars_prompt:
+            - name: extra_disk_sizes
+              prompt: "Digite os tamanhos dos discos extras (em GB), separados por vírgula. Exemplo: 60,100"
+              private: no
+          when: add_disks == "sim"
+
+        - name: Criar discos extras
+          community.vmware.vmware_guest_disk:
+            hostname: "{{ vcenter_hostname }}"
+            username: "{{ vcenter_username }}"
+            password: "{{ vcenter_password }}"
+            validate_certs: no
+            name: "{{ vm_name }}"
+            disk_size: "{{ item }}"
+            disk_type: "{{ default_disk_type }}"
+            datastore: "{{ vm_datastore }}"
+            state: present
+          loop: "{{ extra_disk_sizes.split(',') }}"
+          loop_control:
+            loop_var: item
+          when: add_disks == "sim"
+          
+      when: add_disks == "sim"  # Executa apenas se o usuário optar por adicionar discos extras
+
+    # Em ambiente de produção, você pode alterar o estado para ligado
+    # Para produção, mude o valor de 'state' para 'poweredon'
+    # - name: Ligar a VM após a criação
+    #   community.vmware.vmware_guest:
+    #     hostname: "{{ vcenter_hostname }}"
+    #     username: "{{ vcenter_username }}"
+    #     password: "{{ vcenter_password }}"
+    #     validate_certs: no
+    #     name: "{{ vm_name }}"
+    #     state: poweredon
+    #   delegate_to: localhost
