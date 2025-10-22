@@ -1,0 +1,52 @@
+---
+- name: Adicionar Máquina ao Zabbix
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
+
+  vars_prompt:
+    - name: "zabbix_api_url"
+      prompt: "Digite a URL da API do Zabbix (ex: http://seu_zabbix_server/zabbix)"
+      private: no
+
+    - name: "zabbix_user"
+      prompt: "Digite o nome de usuário para acessar o Zabbix"
+      private: no
+
+    - name: "zabbix_password"
+      prompt: "Digite a senha do Zabbix"
+      private: yes
+
+    - name: "vm_name"
+      prompt: "Qual o nome da máquina (VM) para adicionar ao Zabbix?"
+      private: no
+
+  tasks:
+    - name: Obter o Token de Sessão do Zabbix
+      community.zabbix.zabbix_api:
+        url: "{{ zabbix_api_url }}"
+        username: "{{ zabbix_user }}"
+        password: "{{ zabbix_password }}"
+        validate_certs: no
+      register: zabbix_token
+
+    - name: Adicionar Host no Zabbix
+      community.zabbix.zabbix_host:
+        url: "{{ zabbix_api_url }}"
+        auth: "{{ zabbix_token.auth }}"
+        host: "{{ vm_name }}"
+        interfaces:
+          - type: 1  # Interface de rede (1 = agente Zabbix)
+            main: 1
+            useip: 1
+            ip: "{{ vm_ip }}"  # Defina o IP da VM
+            dns: ""
+            port: "10050"  # Porta padrão do Zabbix Agent
+        groups:
+          - name: "Virtual Machines"  # Grupo no Zabbix (você pode criar esse grupo no Zabbix ou usar outro)
+        templates:
+          - "Template OS Linux"  # Template de monitoramento (você pode ajustar conforme sua necessidade)
+      delegate_to: localhost
