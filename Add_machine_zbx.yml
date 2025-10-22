@@ -7,15 +7,6 @@
   vars:
     ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
 
-  vars_prompt:
-    - name: "vm_name"
-      prompt: "Qual o nome da máquina (VM)?"
-      private: no
-
-    - name: "vm_ip"
-      prompt: "Qual o IP da máquina (VM)?"
-      private: no
-
   tasks:
     - name: Obter o Token de Sessão do Zabbix
       uri:
@@ -54,7 +45,7 @@
                 dns: ""
                 port: "{{ zabbix_port }}"
             groups: "{{ zabbix_groups }}" 
-            templates: "{{ zabbix_templates }}"
+            templates: "{{ zabbix_templates }}" 
           auth: "{{ login_response.json.result }}"
           id: 1
         headers:
@@ -64,4 +55,4 @@
 
     - name: Exibir resposta de criação de host
       debug:
-        var: create_host_response
+        msg: "{{ create_host_response }}"
