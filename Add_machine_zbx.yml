@@ -10,32 +10,32 @@
   tasks:
     - name: Realizar login na API do Zabbix
       community.zabbix.zabbix_api:
-        server_url: "{{ zabbix_api_url }}" 
-        user: "{{ zabbix_user }}"  
-        password: "{{ zabbix_password }}" 
-      register: login_response  
+        server_url: "{{ zabbix_api_url }}"
+        user: "{{ zabbix_user }}"
+        password: "{{ zabbix_password }}"
+      register: login_response
 
     - name: Exibir resposta do login
       debug:
-        msg: "{{ login_response }}" 
+        msg: "{{ login_response }}"
 
     - name: Adicionar host ao Zabbix
       community.zabbix.zabbix_api:
         server_url: "{{ zabbix_api_url }}"
         user: "{{ zabbix_user }}"
         password: "{{ zabbix_password }}"
-        method: "host.create" 
+        method: "host.create"
         params:
           host: "{{ vm_name }}"
           interfaces:
             - type: 1  # Tipo de interface, 1 para usar IP
               main: 1
               useip: 1
-              ip: "{{ vm_ip }}" 
+              ip: "{{ vm_ip }}"
               dns: ""
               port: "{{ zabbix_port }}"
-          groups: "{{ zabbix_groups }}" 
-          templates: "{{ zabbix_templates }}" 
+          groups: "{{ zabbix_groups }}"
+          templates: "{{ zabbix_templates }}"
       register: create_host_response
 
     - name: Exibir resposta de criação do host
