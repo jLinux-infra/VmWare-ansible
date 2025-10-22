@@ -9,7 +9,7 @@
 
   tasks:
     - name: Realizar login na API do Zabbix
-      community.zabbix.zabbix:
+      community.zabbix.zabbix_api:
         server_url: "{{ zabbix_api_url }}" 
         user: "{{ zabbix_user }}"  
         password: "{{ zabbix_password }}" 
