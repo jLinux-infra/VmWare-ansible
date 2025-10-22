@@ -8,18 +8,15 @@
     ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
 
   vars_prompt:
-    # Perguntar o nome da máquina
     - name: vm_name
       prompt: "Qual o nome da máquina?"
       private: no
 
-    # Perguntar o IP da máquina
     - name: vm_ip
       prompt: "Qual o IP da máquina?"
       private: no
 
   tasks:
-    # Obter o Token de Sessão do Zabbix
     - name: Obter o Token de Sessão do Zabbix
       community.zabbix.zabbix_api:
         url: "{{ zabbix_api_url }}"
@@ -28,7 +25,6 @@
         validate_certs: no
       register: zabbix_token
 
-    # Adicionar Host no Zabbix
     - name: Adicionar Host no Zabbix
       community.zabbix.zabbix_host:
         url: "{{ zabbix_api_url }}"
@@ -38,7 +34,7 @@
           - type: 1  # Interface de rede (1 = agente Zabbix)
             main: 1
             useip: 1
-            ip: "{{ vm_ip }}"  # IP da VM fornecido pelo usuário
+            ip: "{{ vm_ip }}" 
             dns: ""
             port: "{{ zabbix_port }}"  # Porta do Zabbix (10050)
         groups: "{{ zabbix_groups }}"  # Grupos fixos definidos nas Extra Variables
