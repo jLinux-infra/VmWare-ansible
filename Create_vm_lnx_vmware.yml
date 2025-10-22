@@ -9,38 +9,31 @@
     default_disk_type: "thin"  # Tipo de provisionamento para os discos
 
   vars_prompt:
-    # Perguntar o nome da máquina
     - name: vm_name
       prompt: "Qual o nome da máquina (VM)?"
       private: no
 
-    # Perguntar o nome da tag (tag name)
     - name: tag_name
       prompt: "Qual o nome da tag para a VM?"
       private: no
     
-    # Perguntar a política da VM
     - name: vm_policy
       prompt: "Qual o nome da policy da VM?"
       private: no
 
-    # Perguntar a quantidade de memória (em GB)
     - name: memory_gb
       prompt: "Quantos GB de memória a VM deve ter?"
       private: no
 
-    # Perguntar a quantidade de CPUs
     - name: num_cpus
       prompt: "Quantas CPUs a VM deve ter?"
       private: no
 
-    # Perguntar se o usuário quer adicionar discos extras
     - name: add_disks
       prompt: "Você deseja adicionar discos extras? (sim/não)"
       private: no
 
   tasks:
-    # Criação da VM
     - name: Criar VM a partir de Template no vSphere
       community.vmware.vmware_guest:
         hostname: "{{ vcenter_hostname }}"
@@ -67,7 +60,6 @@
           - "{{ tag_name }}" 
       delegate_to: localhost
 
-    # Perguntar sobre discos extras, caso o usuário deseje
     - name: Perguntar sobre discos extras (caso sim)
       block:
         - name: Perguntar o número de discos extras
