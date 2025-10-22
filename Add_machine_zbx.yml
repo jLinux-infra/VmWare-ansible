@@ -5,9 +5,13 @@
   gather_facts: false
 
   vars:
-    ansible_python_interpreter: "/usr/bin/python3"
+    ansible_python_interpreter: "/usr/bin/python3" 
 
   tasks:
+    - name: Exibir URL do Zabbix
+      debug:
+        msg: "A URL do Zabbix é: {{ zabbix_api_url }}"
+
     - name: Obter o Token de Sessão do Zabbix
       uri:
         url: "{{ zabbix_api_url }}/api_jsonrpc.php"
@@ -22,13 +26,15 @@
         headers:
           Content-Type: "application/json"
         return_content: yes
-        validate_certs: no
+        validate_certs: no  # Ignora a validação de certificado SSL (não aplicável no HTTP)
+        timeout: 30  # Aumenta o tempo de timeout da requisição
       register: login_response
 
     - name: Exibir resposta do login
       debug:
         msg: "{{ login_response }}"
 
+    # Adicionar Host no Zabbix
     - name: Adicionar Host no Zabbix
       uri:
         url: "{{ zabbix_api_url }}/api_jsonrpc.php"
@@ -45,8 +51,8 @@
                 ip: "{{ vm_ip }}"
                 dns: ""
                 port: "{{ zabbix_port }}"
-            groups: "{{ zabbix_groups }}" 
-            templates: "{{ zabbix_templates }}" 
+            groups: "{{ zabbix_groups }}"
+            templates: "{{ zabbix_templates }}"
           auth: "{{ login_response.json.result }}"
           id: 1
         headers:
