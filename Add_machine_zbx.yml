@@ -5,11 +5,11 @@
   gather_facts: false
 
   vars:
-    ansible_python_interpreter: "/usr/bin/python3"  # Usar Python 3
+    ansible_python_interpreter: "/usr/bin/python3"
 
   tasks:
     - name: Realizar login na API do Zabbix
-      community.zabbix.zabbix_api:
+      community.zabbix.zabbix:
         server_url: "{{ zabbix_api_url }}" 
         user: "{{ zabbix_user }}"  
         password: "{{ zabbix_password }}" 
@@ -40,4 +40,4 @@
 
     - name: Exibir resposta de criação do host
       debug:
-        msg: "{{ create_host_response }}"  # Exibe a resposta para debug
+        msg: "{{ create_host_response }}"
