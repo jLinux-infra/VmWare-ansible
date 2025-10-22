@@ -13,6 +13,11 @@
     - name: vm_name
       prompt: "Qual o nome da máquina (VM)?"
       private: no
+
+    # Perguntar o nome da tag (tag name)
+    - name: tag_name
+      prompt: "Qual o nome da tag para a VM?"
+      private: no
     
     # Perguntar a política da VM
     - name: vm_policy
@@ -58,6 +63,8 @@
           memory_mb: "{{ memory_gb | int * 1024 }}"  # Convertendo GB para MB
           num_cpus: "{{ num_cpus }}"
         wait_for_ip_address: true
+        tags:
+          - "{{ tag_name }}" 
       delegate_to: localhost
 
     # Perguntar sobre discos extras, caso o usuário deseje
