@@ -10,7 +10,7 @@
   tasks:
     - name: Obter o Token de Sessão do Zabbix
       uri:
-        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
+        url: "{{ zabbix_api_url }} #/api_jsonrpc.php"
         method: POST
         body:
           jsonrpc: "2.0"
