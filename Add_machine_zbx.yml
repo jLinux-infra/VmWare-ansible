@@ -5,61 +5,39 @@
   gather_facts: false
 
   vars:
-    ansible_python_interpreter: "/usr/bin/python3" 
+    ansible_python_interpreter: "/usr/bin/python3"  # Usar Python 3
 
   tasks:
-    - name: Exibir URL do Zabbix
-      debug:
-        msg: "A URL do Zabbix é: {{ zabbix_api_url }}"
-
-    - name: Obter o Token de Sessão do Zabbix
-      uri:
-        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
-        method: POST
-        body:
-          jsonrpc: "2.0"
-          method: "user.login"
-          params:
-            user: "{{ zabbix_user }}"
-            password: "{{ zabbix_password }}"
-          id: 1
-        headers:
-          Content-Type: "application/json"
-        return_content: yes
-        validate_certs: no  # Ignora a validação de certificado SSL (não aplicável no HTTP)
-        timeout: 30  # Aumenta o tempo de timeout da requisição
-      register: login_response
+    - name: Realizar login na API do Zabbix
+      community.zabbix.zabbix_api:
+        server_url: "{{ zabbix_api_url }}" 
+        user: "{{ zabbix_user }}"  
+        password: "{{ zabbix_password }}" 
+      register: login_response  
 
     - name: Exibir resposta do login
       debug:
-        msg: "{{ login_response }}"
+        msg: "{{ login_response }}" 
 
-    # Adicionar Host no Zabbix
-    - name: Adicionar Host no Zabbix
-      uri:
-        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
-        method: POST
-        body:
-          jsonrpc: "2.0"
-          method: "host.create"
-          params:
-            host: "{{ vm_name }}"
-            interfaces:
-              - type: 1
-                main: 1
-                useip: 1
-                ip: "{{ vm_ip }}"
-                dns: ""
-                port: "{{ zabbix_port }}"
-            groups: "{{ zabbix_groups }}"
-            templates: "{{ zabbix_templates }}"
-          auth: "{{ login_response.json.result }}"
-          id: 1
-        headers:
-          Content-Type: "application/json"
-        return_content: yes
+    - name: Adicionar host ao Zabbix
+      community.zabbix.zabbix_api:
+        server_url: "{{ zabbix_api_url }}"
+        user: "{{ zabbix_user }}"
+        password: "{{ zabbix_password }}"
+        method: "host.create" 
+        params:
+          host: "{{ vm_name }}"
+          interfaces:
+            - type: 1  # Tipo de interface, 1 para usar IP
+              main: 1
+              useip: 1
+              ip: "{{ vm_ip }}" 
+              dns: ""
+              port: "{{ zabbix_port }}"
+          groups: "{{ zabbix_groups }}" 
+          templates: "{{ zabbix_templates }}" 
       register: create_host_response
 
-    - name: Exibir resposta de criação de host
+    - name: Exibir resposta de criação do host
       debug:
-        msg: "{{ create_host_response }}"
+        msg: "{{ create_host_response }}"  # Exibe a resposta para debug
