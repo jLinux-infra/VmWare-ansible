@@ -7,7 +7,6 @@
   vars:
     ansible_python_interpreter: "/usr/bin/python3"
 
-  tasks:
     - name: Realizar login na API do Zabbix
       community.zabbix.zabbix_api:
         server_url: "{{ zabbix_api_url }}" 
