@@ -4,6 +4,9 @@
   connection: local
   gather_facts: false
 
+  collections:
+  - name: community.zabbix
+
   vars:
     ansible_python_interpreter: "/usr/bin/python3"
 
