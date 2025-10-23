@@ -8,31 +8,6 @@
     ansible_python_interpreter: "/etc/ansible/playbooks/venv/bin/python"
     default_disk_type: "thin"  # Tipo de provisionamento para os discos
 
-  vars_prompt:
-    - name: vm_name
-      prompt: "Qual o nome da máquina (VM)?"
-      private: no
-
-    - name: tag_name
-      prompt: "Qual o nome da tag para a VM?"
-      private: no
-    
-    - name: vm_policy
-      prompt: "Qual o nome da policy da VM?"
-      private: no
-
-    - name: memory_gb
-      prompt: "Quantos GB de memória a VM deve ter?"
-      private: no
-
-    - name: num_cpus
-      prompt: "Quantas CPUs a VM deve ter?"
-      private: no
-
-    - name: add_disks
-      prompt: "Você deseja adicionar discos extras? (sim/não)"
-      private: no
-
   tasks:
     - name: Criar VM a partir de Template no vSphere
       community.vmware.vmware_guest:
