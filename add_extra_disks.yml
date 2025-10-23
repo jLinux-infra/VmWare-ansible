@@ -1,0 +1,24 @@
+---
+- name: Adicionar discos extras à VM
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    default_disk_type: "thin"  # Tipo de provisionamento para os discos
+
+  tasks:
+    - name: Criar discos extras
+      community.vmware.vmware_guest_disk:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: no
+        name: "{{ vm_name }}"
+        disk_size: "{{ item }}"
+        disk_type: "{{ default_disk_type }}"
+        datastore: "{{ vm_datastore }}"
+        state: present
+      loop: "{{ extra_disk_sizes.split(',') }}"
+      loop_control:
+        loop_var: item
