@@ -35,37 +35,13 @@
           - "{{ tag_name }}" 
       delegate_to: localhost
 
-    # Perguntar sobre discos extras (caso sim)
-    - name: Perguntar sobre discos extras
-      block:
-        - name: Perguntar o número de discos extras
-          vars_prompt:
-            - name: num_extra_disks
-              prompt: "Quantos discos extras você deseja adicionar?"
-              private: no
-        - name: Perguntar o tamanho de cada disco
-          vars_prompt:
-            - name: extra_disk_sizes
-              prompt: "Digite os tamanhos dos discos extras (em GB), separados por vírgula. Exemplo: 60,100"
-              private: no
-        - name: Criar discos extras
-          community.vmware.vmware_guest_disk:
-            hostname: "{{ vcenter_hostname }}"
-            username: "{{ vcenter_username }}"
-            password: "{{ vcenter_password }}"
-            validate_certs: no
-            name: "{{ vm_name }}"
-            disk_size: "{{ item }}"
-            disk_type: "{{ default_disk_type }}"  # Thin provision
-            datastore: "{{ vm_datastore }}"
-            state: present
-          loop: "{{ extra_disk_sizes.split(',') }}"
-          loop_control:
-            loop_var: item
-      when: add_disks == "Sim"  # Executa apenas se a resposta for "Sim"
+    # Condicional: Se o usuário optar por discos extras, incluir o playbook de discos extras
+    - name: Incluir playbook de discos extras
+      include_tasks: add_extra_disks.yml
+      when: add_disks == "Sim"
 
-    # Caso contrário, pode seguir com o fluxo normal
+    # Continuar o fluxo normalmente, sem discos extras, caso a resposta seja "Não"
     - name: Continuar com o fluxo sem discos extras
       debug:
         msg: "A VM será criada sem discos extras."
-      when: add_disks == "Não"  # Executa apenas se a resposta for "Não"
+      when: add_disks == "Não"
